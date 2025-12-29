@@ -1,3 +1,5 @@
+npm run apit
+
 npm init -y
 
 npm i express
@@ -5,3 +7,5 @@ npm i express
 npm i nodemon
 
 npm i body-parse
+
+npm i mysql
