@@ -18,32 +18,38 @@ app.get('/', (req, res) => {
 // })
 
 
-app.get('/student', (req, res) => {
-    const allStudents = `SELECT * FROM student`
-    db.query(allStudents, (err, result) => {
+app.get('/students', (req, res) => {
+    const queryAllStudent = `SELECT * FROM student`
+    db.query(queryAllStudent, (err, result) => {
         if (err) {
-            return response(500, null, err.message, res)
+            console.error(`ERROR: ${err.message}`)
+            return response(500, null, 'Server error', res, 'SERVER_ERROR')
         }
-        response(200, result, 'succcess all student', res)
+        response(200, result, 'message succcess all student', res)
     })
 })
 
-app.get('/student/:studentId', (req, res) => {
+app.get('/students/:studentId', (req, res) => {
     const student_Id = req.params.studentId
-    const byNoKp = `SELECT no_kp FROM student WHERE student_id = ?`
-    db.query(byNoKp, [student_Id], (err, result) => {
+    const queryNoKp = `SELECT no_kp FROM student WHERE student_id = ?`
+    db.query(queryNoKp, [student_Id], (err, result) => {
+        if (isNaN(student_Id)) {
+            return response(400, null, 'Invalid student id', res, 'INVALID_STUDENT_ID')
+        }
         if (err) {
-        return res.status(500).json({
-            status: 'error',
-            message: err.message
-        })
-}
-        response(200, result, 'success', res)
+            console.error(`ERROR: ${err.message}`)
+            return response(500, null, 'Server error', res, 'SERVER_ERROR')
+        }
+        if (result.length === 0) {
+            return response(404, result, 'Student not found', res, 'STUDENT_NOT_FOUND')
+        }
+
+        response(200, result, 'message ok', res)
     })
 })
 
 
-app.post('/api/student', (req, res) => {
+app.post('/students', (req, res) => {
 
     // conton FE convert data form → JSON
     // FE = Client → HTTP → BE = Server
@@ -60,15 +66,15 @@ app.post('/api/student', (req, res) => {
     console.log('body', req.body)
 
     if (!matric_no || !email || !student_name || !course_id || !no_kp) {
-        return response(400, null, 'matric_no, no_kp, email, student_name, and course_id are required', res)
+        return response(400, null, 'Invalid input', res, 'REQUIRED_ERROR')
     }
 
     if(!validEmail(email)) {
-        return response(400, null, 'Invalid email format', res)
+        return response(400, null, 'Invalid email input', res, 'INVALID_EMAIL')
     }
 
     if(!validNoKp(no_kp)) {
-        return response(400, null, 'Invalid IC number format', res)
+        return response(400, null, 'Invalid No KP input', res, 'INVALID_NO_KP')
     }
 
     const insertStudent = `
@@ -88,15 +94,17 @@ app.post('/api/student', (req, res) => {
     db.query(insertStudent, values,
         (err, result) => {
             if (err) {
-                console.error(err)
                 if (err.code === 'ER_DUP_ENTRY') {
-                    return response(409, null, 'Registration failed', res
-                )}
-                return response(500, null, `DB Err${err.message}`, res)
+                    console.error(`ERROR: ${err.message}`)
+                    return response(409, null, 'Unable, Please check your information.', res, 'DUPLICATE_STUDENT')
+                }
+                console.error(`ERROR: ${err.message}`)
+                return response(500, null, `error `, res, 'SERVER_ERROR')
             }
         
         if (result.affectedRows !== 1) {
-            return response(400, null, 'Student not created', res)
+            console.error(`ERROR: ${err.message}`)
+            return response(400, null, 'Student not created', res, 'STUDENT_NOT_CREATED')
         }
         
         const dataResult = {
@@ -108,22 +116,27 @@ app.post('/api/student', (req, res) => {
 })
 
 
-app.get('/course', (req, res) => {
-    const allCourse = `SELECT  * FROM courses`
-    db.query(allCourse, (err, result) => {
+app.get('/courses', (req, res) => {
+    const queryAllCourse = `SELECT  * FROM courses`
+    db.query(queryAllCourse, (err, result) => {
         if (err) {
-            return response(500, null, err.message, res)
+            console.error(`ERROR: ${err.message}`)
+            return response(500, null, 'Server error', res, 'SERVER_ERROR')
         }
         response(200, result, 'succcess all course', res)
     })
 })
 
-app.get('/courses/:courseNo', (req, res) => {
-    const course_no = req.params.courseNo
-    const byCourseNo = `SELECT * FROM courses WHERE course_no = ?`
-    db.query(byCourseNo, [course_no], (err, result) => {
+app.get('/courses/:courseCode', (req, res) => {
+    const paramas_course_code = req.params.courseCode
+    const queryCourseNo = `SELECT * FROM courses WHERE course_code = ?`
+    db.query(queryCourseNo, [paramas_course_code], (err, result) => {
         if (err) {
-            return response(500, null, err.message, res)
+            console.error(`ERROR: ${err.message}`)
+            return response(500, null, 'Server error', res, 'SERVER_ERROR')
+        }
+        if (result.length === 0) {
+            return response(404, result, 'Course not found', res, 'COURSE_NOT_FOUND')
         }
         response(200, result, 'succcess', res)
     })
@@ -133,33 +146,37 @@ app.get('/courses/:courseNo', (req, res) => {
 // ? = Array
 // Array	    Support multiple placeholders
 
-app.get('/ndp/:valndp', (req, res) => {
-    const ndp = req.params.valndp
-    const byNdp = `
+app.get('/ndp/:matricNo', (req, res) => {
+    const params_ndp = req.params.matricNo
+    const queryNdp = `
         SELECT matric_no, student_name
         FROM student
         WHERE matric_no = ?`
         // ${ndp} -> ? placeholder
 
-    db.query(byNdp, [ndp], (err, result) => {
+    db.query(queryNdp, [params_ndp], (err, result) => {
         if (err) {
-            return response(500, null, err.message, res)
+            console.error(`ERROR: ${err.message}`)
+            return response(500, null, 'Server error', res, 'SERVER_ERROR')
+        }
+        if (result.length === 0) {
+            return response(404, result, 'Student not found', res, 'STUDENT_NOT_FOUND')
         }
         response(200, result, 'by ndp', res)
     })
 })
 
 
-app.post('/student', (req, res) => {
-    response(200, 'DATA', 'success',  res)
-})
+// app.post('/students', (req, res) => {
+//     response(200, 'DATA', 'success',  res)
+// })
 
-app.put('/student', (req, res) => {
+app.put('/students', (req, res) => {
        response(200, 'put', 'success',  res)
 
 })
 
-app.delete('/student', (req, res) => {
+app.delete('/students', (req, res) => {
     response(200, 'delete', 'success',  res)
 })
 

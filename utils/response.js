@@ -1,15 +1,15 @@
-const response = (statusCode, data, message, res) => {
+const response = (statusCode, data, message, res, errorCode = null, metadata = null) => {
     // func status ( http code ) dari express = Network -> Headers 
-    res.status(statusCode).json({
+    const resBody = {
+        success: statusCode < 400, // check conditon true or false
         payload: data,
         message,
-        metadata: {
-            prev: "",
-            next: "",
-            current: ""
-        },
-    })
-    // res.send(statusCode, message)
+        statusCode,
+    }
+    if(metadata) resBody.metadata = metadata
+    if(errorCode) resBody.errorCode = errorCode
+    
+    return res.status(statusCode).json(resBody)
 }
 
 
