@@ -4,7 +4,7 @@ const port = 3000
 const bodyParser = require('body-parser') // Middleware = function yang duduk di tengah-tengah request & response
 // app.use(express.json());
 const db = require('./connection')
-const response = require('./response')
+const response = require('./utils/response')
 
 // user sign up ( FE ) -> response -> ( BE ) request -> dapat data -> ( JSON )
 // Middleware to read JSON / req.body

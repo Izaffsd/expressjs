@@ -1,11 +1,24 @@
-npm run apit
+# Node.js API Setup
 
+## Initialize Project
 npm init -y
 
-npm i express
 
+Install Dependencies
+
+npm i express mysql
 npm i nodemon
 
-npm i body-parse
 
-npm i mysql
+Run Server
+
+npm run apit
+
+
+express → backend framework
+
+mysql → database connection
+
+nodemon → auto restart server
+
+Use express.json() to parse JSON request body
