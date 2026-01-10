@@ -1,9 +1,19 @@
-const express = require('express')
+import express from 'express'
+import 'dotenv/config'
+import morgan from 'morgan'
+import db from './db/connection.js'
+import { response } from './utils/response.js'
+import { validNoKp, validEmail, validId, validCourseCode, validMatricNo } from './utils/validator.js'
+
 const app = express()
-const port = 3000
-const db = require('./connection')
-const response = require('./utils/response')
-const { validNoKp, validEmail, validId, validCourseCode, validMatricNo } = require('./utils/validator')
+const PORT = process.env.PORT
+
+
+if (process.env.MORGAN_LOG === 'production') {
+  app.use(morgan('combined'))
+} else {
+  app.use(morgan('dev'))
+}
 
 app.use(express.json()) // better than body-parser
 
@@ -421,8 +431,9 @@ app.delete('/courses/:courseId', (req, res) => {
     })
 })
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+// app.use('/')
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`)
 })
 
 

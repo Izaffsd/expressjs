@@ -1,4 +1,4 @@
-const response = (statusCode, data, message, res, errorCode = null, metadata = null) => {
+export const response = (statusCode, data, message, res, errorCode = null, metadata = null) => {
     // func status ( http code ) dari express = Network -> Headers 
     const resBody = {
         success: statusCode < 400, // check conditon true or false
@@ -52,5 +52,4 @@ const response = (statusCode, data, message, res, errorCode = null, metadata = n
 //     ]
 //     )
 // }
-
-module.exports = response
+// export default response
